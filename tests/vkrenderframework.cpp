@@ -70,16 +70,11 @@ VkPhysicalDevice VkRenderFramework::gpu() {
 
 // Return true if layer name is found and spec+implementation values are >= requested values
 bool VkRenderFramework::InstanceLayerSupported(const char *name, uint32_t spec, uint32_t implementation) {
-    uint32_t layer_count = 0;
     std::vector<VkLayerProperties> layer_props;
 
-    VkResult res = vkEnumerateInstanceLayerProperties(&layer_count, NULL);
+    VkResult res = VkTestEnumerate(layer_props, vkEnumerateInstanceLayerProperties);
     if (VK_SUCCESS != res) return false;
-    if (0 == layer_count) return false;
-
-    layer_props.resize(layer_count);
-    res = vkEnumerateInstanceLayerProperties(&layer_count, layer_props.data());
-    if (VK_SUCCESS != res) return false;
+    if (0 == layer_props.size()) return false;
 
     for (auto &it : layer_props) {
         if (0 == strncmp(name, it.layerName, VK_MAX_EXTENSION_NAME_SIZE)) {
@@ -91,15 +86,11 @@ bool VkRenderFramework::InstanceLayerSupported(const char *name, uint32_t spec, 
 
 // Return true if extension name is found and spec value is >= requested spec value
 bool VkRenderFramework::InstanceExtensionSupported(const char *ext_name, uint32_t spec) {
-    uint32_t ext_count = 0;
     std::vector<VkExtensionProperties> ext_props;
-    VkResult res = vkEnumerateInstanceExtensionProperties(nullptr, &ext_count, nullptr);
+    const char *no_name = nullptr;  // Correct "context" type for template type inference for the null pLayerName argument
+    VkResult res = VkTestEnumerate(no_name, ext_props, vkEnumerateInstanceExtensionProperties);
     if (VK_SUCCESS != res) return false;
-    if (0 == ext_count) return false;
-
-    ext_props.resize(ext_count);
-    res = vkEnumerateInstanceExtensionProperties(nullptr, &ext_count, ext_props.data());
-    if (VK_SUCCESS != res) return false;
+    if (0 == ext_props.size()) return false;
 
     for (auto &it : ext_props) {
         if (0 == strncmp(ext_name, it.extensionName, VK_MAX_EXTENSION_NAME_SIZE)) {
@@ -672,8 +663,7 @@ void VkImageObj::ImageMemoryBarrier(VkCommandBufferObj *cmd_buf, VkImageAspectFl
             VK_ACCESS_SHADER_READ_BIT |
             VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
             VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_READ_BIT |
-            VK_MEMORY_INPUT_COPY_BIT*/,
-                                    VkImageLayout image_layout) {
+            VK_MEMORY_INPUT_COPY_BIT*/, VkImageLayout image_layout) {
     const VkImageSubresourceRange subresourceRange = subresource_range(aspect, 0, 1, 0, 1);
     VkImageMemoryBarrier barrier;
     barrier = image_memory_barrier(output_mask, input_mask, Layout(), image_layout, subresourceRange);

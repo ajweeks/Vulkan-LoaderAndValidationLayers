@@ -32,8 +32,46 @@ class VkImageObj;
 #include <array>
 #include <map>
 #include <vector>
+#include <functional>
 
 using namespace std;
+
+// Define types which allow type deductions in VkTestEnumerate
+template <typename Context, typename Data>
+using VkTestEnumerateFunc3 = VkResult (*)(Context, uint32_t *, Data *);
+
+template <typename Data>
+using VkTestEnumerateFunc = VkResult (*)(uint32_t *, Data *);
+
+template <typename Data>
+using VkTestEnumerateWrapper = std::function<VkResult(uint32_t *, Data *)>;
+
+// Implements a generic 2 arguement enumeration .  Input data is not changed if first enumeration fails
+template <typename Data>
+VkResult VkTestEnumerate(std::vector<Data> &data, const VkTestEnumerateWrapper<Data> &enumerator) {
+    uint32_t count = 0;
+    VkResult res = enumerator(&count, NULL);
+    if (VK_SUCCESS == res) {
+        data.clear();
+        data.resize(count);
+        res = enumerator(&count, data.data());
+    }
+    return res;
+}
+
+template <typename Data>
+VkResult VkTestEnumerate(std::vector<Data> &data, VkTestEnumerateFunc<Data> enumerator) {
+    return VkTestEnumerate(data, VkTestEnumerateWrapper<Data>(enumerator));
+}
+
+// Use lambda partial application to allow a single implementation of the enumeration two-step logic (above)
+template <typename Context, typename Data>
+VkResult VkTestEnumerate(Context context, std::vector<Data> &data, VkTestEnumerateFunc3<Context, Data> enumerator) {
+    VkTestEnumerateWrapper<Data> wrapper = [context, enumerator](uint32_t *count, Data *data) {
+        return enumerator(context, count, data);
+    };
+    return VkTestEnumerate(data, wrapper);
+}
 
 class VkDeviceObj : public vk_testing::Device {
    public:
