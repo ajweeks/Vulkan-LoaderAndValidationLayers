@@ -271,9 +271,12 @@ if (WIN32)
     set_target_properties(SPIRV-Tools PROPERTIES
                          IMPORTED_LOCATION       "${SPIRV_TOOLS_LIB}"
                          IMPORTED_LOCATION_DEBUG "${SPIRV_TOOLS_DLIB}")
+    set_target_properties(SPIRV-Tools-opt PROPERTIES
+                         IMPORTED_LOCATION       "${SPIRV_TOOLS_OPT_LIB}"
+                         IMPORTED_LOCATION_DEBUG "${SPIRV_TOOLS_OPT_DLIB}")
 
     set (GLSLANG_LIBRARIES glslang OGLCompiler OSDependent HLSL SPIRV SPVRemapper)
-    set (SPIRV_TOOLS_LIBRARIES SPIRV-Tools)
+    set (SPIRV_TOOLS_LIBRARIES SPIRV-Tools SPIRV-Tools-opt)
 else ()
     set (GLSLANG_LIBRARIES ${GLSLANG_LIB} ${OGLCompiler_LIB} ${OSDependent_LIB} ${HLSL_LIB} ${SPIRV_LIB} ${SPIRV_REMAPPER_LIB})
     set (SPIRV_TOOLS_LIBRARIES ${SPIRV_TOOLS_LIB} ${SPIRV_TOOLS_OPT_LIB})
