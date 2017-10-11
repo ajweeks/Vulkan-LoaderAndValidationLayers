@@ -222,6 +222,9 @@ find_library(SPIRV_REMAPPER_LIB NAMES SPVRemapper
 find_library(SPIRV_TOOLS_LIB NAMES SPIRV-Tools
              HINTS ${SPIRV_TOOLS_SEARCH_PATH} )
 
+find_library(SPIRV_TOOLS_OPT_LIB NAMES SPIRV-Tools-opt
+             HINTS ${SPIRV_TOOLS_SEARCH_PATH} )
+
 if (WIN32)
     add_library(glslang     STATIC IMPORTED)
     add_library(OGLCompiler STATIC IMPORTED)
@@ -273,7 +276,7 @@ if (WIN32)
     set (SPIRV_TOOLS_LIBRARIES SPIRV-Tools)
 else ()
     set (GLSLANG_LIBRARIES ${GLSLANG_LIB} ${OGLCompiler_LIB} ${OSDependent_LIB} ${HLSL_LIB} ${SPIRV_LIB} ${SPIRV_REMAPPER_LIB})
-    set (SPIRV_TOOLS_LIBRARIES ${SPIRV_TOOLS_LIB})
+    set (SPIRV_TOOLS_LIBRARIES ${SPIRV_TOOLS_LIB} ${SPIRV_TOOLS_OPT_LIB})
 endif()
 
 set (PYTHON_CMD ${PYTHON_EXECUTABLE})
